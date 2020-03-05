@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)|$(TargetFramework)'=='Release|net472'">
-    <Exec ContinueOnError="true" Command="XCOPY &quot;$(TargetDir)*&quot; &quot;..\..\..\Assets\Plugins&quot; /exclude:excludeFromUnity.txt /C /I /F /Y" />
+    <Exec ContinueOnError="true" Command="XCOPY &quot;$(TargetDir)*&quot; &quot;..\..\Assets\Plugins&quot; /exclude:excludeFromUnity.txt /C /I /F /Y" />
   </Target>
 
 </Project>

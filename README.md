@@ -178,14 +178,14 @@ It has several things of note:
  2. **The PostBuild Event**. I have it set to only run for Release builds, but you can enable it for Debug builds too by just deleting the `Condition` attribute on the `Target` element, if you don't mind releasing or cleaning up your PDB files all the time.
     1. Executes an XCOPY command, where the parameters are:
        1. `$(TargetDir)*` - i.e. every file in the output directory.
-       2. `..\..\..\Assets\Plugins` - a relative path to where we want to dump the files.
+       2. `..\..\Assets\Plugins` - a relative path to where we want to dump the files.
        3. `/exclude:excludeFromUnity.cs` - references a file that lists files that should not be copied. More on this in a minute.
        4. `/C` - Continues copying even if errors occur.
        5. `/I` - If destination does not exist and copying more than one file, assumes that destination must be a directory.
        6. `/F` - Displays full source and destination file names while copying.
        7. `/Y` - Suppresses prompting to confirm you want to overwrite an existing destination file.
  3. **There are no source files**. We don't need 'em, but see "Optional Item 1" below for an idea of what could be put in here.
- 4. **ecludeFromUnity.txt contains ChuckNorirs.Unity.dll**. Even though there are no source files in the project, a DLL will still be generated. We don't need it, so no need to include it in the export. Also, occasionally, there are certain DLLs that don't play nicely with Unity, that were only added by default by MSBuild. You can use this file to prevent them from being copied. It's also useful in "Optional Item 1" below.
+ 4. **ecludeFromUnity.txt contains ChuckNorris.Unity.dll**. Even though there are no source files in the project, a DLL will still be generated. We don't need it, so no need to include it in the export. Also, occasionally, there are certain DLLs that don't play nicely with Unity, that were only added by default by MSBuild. You can use this file to prevent them from being copied. It's also useful in "Optional Item 1" below.
  
 
 ### Optional Item 1: Put some meat on the Binding DLLs bones.
@@ -210,7 +210,7 @@ Here are some steps that I undertake to make it a little easier to maintain over
 
 Here is that assembly reference:
 ```xml
-  <ItemGroup>
+  <ItemGroup Condition="Exists('$(UNITY_ROOT)')">
     <Reference Include="$(UNITY_ROOT)\Editor\Data\Managed\UnityEngine.dll" />
   </ItemGroup>
 ```

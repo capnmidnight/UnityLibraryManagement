@@ -2,22 +2,33 @@
 
 using UnityEngine;
 
-public class JokeSetter : MonoBehaviour
+namespace ChuckNorris
 {
-    public TextMeshProUGUI text;
-    private void OnValidate()
+    public class JokeSetter : MonoBehaviour
     {
-        if(text == null)
+        public TextMeshProUGUI text;
+        private ChuckNorris client;
+
+        private void OnValidate()
         {
-            text = GetComponent<TextMeshProUGUI>();
+            if (text == null)
+            {
+                text = GetComponent<TextMeshProUGUI>();
+            }
+        }
+
+        private void Awake()
+        {
+            client = new ChuckNorris();
+        }
+
+        public void NextJoke()
+        {
+            if (text != null)
+            {
+                text.SetText(client.GetRandom().value);
+            }
         }
     }
 
-    public void NextJoke()
-    {
-        if(text != null)
-        {
-            text.SetText(ChuckNorris.Jokes.Next());
-        }
-    }
 }
