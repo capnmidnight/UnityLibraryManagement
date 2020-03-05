@@ -14,8 +14,8 @@
     <ProjectReference Include="..\ChuckNorris\ChuckNorris.csproj" />
   </ItemGroup>
 
-    <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)|$(TargetFramework)'=='Release|net472'">
-        <Exec ContinueOnError="true" Command="XCOPY &quot;$(TargetDir)*&quot; &quot;..\..\..\Assets\Plugins&quot; /C /I /F /Y" />
-    </Target>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)|$(TargetFramework)'=='Release|net472'">
+    <Exec ContinueOnError="true" Command="XCOPY &quot;$(TargetDir)*&quot; &quot;..\..\..\Assets\Plugins&quot; /exclude:excludeFromUnity.txt /C /I /F /Y" />
+  </Target>
 
 </Project>

@@ -7,7 +7,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChuckNorris", "ChuckNorris\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChuckNorris.Unity", "ChuckNorris.Unity\ChuckNorris.Unity.csproj", "{D9F4A859-6109-4F32-BE51-8F41F12D2E32}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChuckNorris.Console", "ChuckNorris.Console\ChuckNorris.Console.csproj", "{8834912B-3AE3-4D32-9FD9-C85FE13C5AE8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChuckNorris.Console", "ChuckNorris.Console\ChuckNorris.Console.csproj", "{8834912B-3AE3-4D32-9FD9-C85FE13C5AE8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BE150165-5064-4465-BAB0-7E57B07B4D7C}"
+	ProjectSection(SolutionItems) = preProject
+		..\README.md = ..\README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
