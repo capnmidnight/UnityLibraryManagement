@@ -8,15 +8,13 @@ Here's how it works. Incidentally, this process also means we can now use other 
 
 ## Overview
 
-To get everything to work just right, we have to commit to using a relatively rigid folder structure for our project. In principle, I'm not a fan of "magic folders", different areas of your project getting special treatment just because their parent folder is named a certain way. I didn't like it in Ruby-On-Rails, and I don't like it here. We are adults, we can write configuration files and fully specify our dependencies. But in practice, we only need to use this structure as the "trick" to get Unity to use independently sourced and managed dependencies. In day-to-day development, we're still setting up our projects as we want for development.
+To get everything to work just right, we have to commit to using a relatively rigid folder structure for our project. In principle, I'm not a fan of "magic folders", different areas of your project getting special treatment just because their parent folder is named a certain way. I didn't like it in Ruby-On-Rails and Django, and I don't like it here. We are adults, we can write configuration files and fully specify our dependencies. But in practice, we only need to use this structure as the "trick" to get Unity to use independently sourced and managed dependencies. In day-to-day development, we're still setting up our projects as we want for development.
 
  1. Out-of-band of our Unity project (or, at least the Assets folder), we create our own Visual Studio Solution for doing all the development we want that is not touching anything involving MonoBehaviour.
-    1. While .NET Standard 2.0 DLLs are technically consumable in Unity, the way in which their transient dependencies are specified *are not*. .NET Standard 2.0 DLLs deploy with a DLL for the code that they encapsulate, plus a `dependencies.json` file listing its transient dependencies. This is in contrast to .NET Framework, where transient dependencies get copied to the output directory of a DLL project. With that in mind, we'll be creating One-Assembly-To-Rule-Them-All to take .NET Standard 2.0 code and assemblies and .NET Framework v4.7.2 code and assemblies and package them all up in a way that Unity will not barf over.
+    1. While .NET Standard 2.0 DLLs are technically consumable in Unity, the way in which their transient dependencies are specified *is not*. .NET Standard 2.0 DLLs deploy with a DLL for the code that they encapsulate, plus a `dependencies.json` file listing its transient dependencies. This is in contrast to .NET Framework, where transient dependencies get copied to the output directory of a DLL project. With that in mind, we'll be creating One-Assembly-To-Rule-Them-All to take .NET Standard 2.0 code and assemblies and .NET Framework v4.7.2 code and assemblies and package them all up in a way that Unity will not barf over.
     2. To ease in managing all of these different target framework types, we'll want all Project Files within this solution to be built in the newer [SDK Style Project](https://docs.microsoft.com/en-us/dotnet/core/tools/csproj) format.
     3. An XCOPY command takes the collected DLLs from the Ring-Of-Power project and dumps them into your Unity project's Assets/Plugins folder.
  2. In-band of our Unity project, you may want to consider setting the Backend Type in the Project Settings to ".NET 4.x". Unfortunately, I've encountered legitimate defects within the Mono implementations of the .NET Standard 2.0 version of some dependencies.
-
-You may also want to read up on [Target frameworks in SDK-style projects](https://docs.microsoft.com/en-us/dotnet/standard/frameworks). This explains how you reference individual frameworks within MSBuild.
 
 ### Create the Out-of-band VS Solution
 
@@ -46,7 +44,15 @@ Gone are the days of gigantic csproj files. The simplest csproj file now looks l
 </Project>
 ```
 
-Notice the lack of XML doctype declaration, the lack of importing MSBuild subprojects, even the lack of naming the assembly and root namespace. While those may certainly be added for more control, most projects will use the defualts of the project type specified by "Microsof.NET.Sdk" and the assembly and namespace names taken from the project directory name. For more information on SDKs, read [How to: Use MSBuild project SDKs](https://docs.microsoft.com/en-us/visualstudio/msbuild/how-to-use-project-sdk) and [.NET Core project SDKs](https://docs.microsoft.com/en-us/dotnet/core/project-sdk/overview). Once you've gone through that, also check out [nirin/msbuild-sdks on Github](https://github.com/nirin/msbuild-sdks) for some more options on target frameworks. Finally, you may want to brush up on [.NET Standard](https://docs.microsoft.com/en-us/dotnet/standard/net-standard) and which .NET implementations implement which .NET standards. Of note, .NET Standard 2.0 is the last standard that .NET Framework will support, with support going back to .NET Framework v4.6.2.
+Notice the lack of XML doctype declaration, the lack of importing MSBuild subprojects, even the lack of naming the assembly and root namespace. While those may certainly be added for more control, most projects will use the defualts of the project type specified by "Microsoft.NET.Sdk" and the assembly and namespace names taken from the project directory name. 
+
+For more information on .NET Standard, the SDKs, and MSBuild, you might like to read 
+ 1. [.NET Standard](https://docs.microsoft.com/en-us/dotnet/standard/net-standard)
+ 2. [SDK Style Project](https://docs.microsoft.com/en-us/dotnet/core/tools/csproj)
+ 3. [Target frameworks in SDK-style projects](https://docs.microsoft.com/en-us/dotnet/standard/frameworks).
+ 4. [How to: Use MSBuild project SDKs](https://docs.microsoft.com/en-us/visualstudio/msbuild/how-to-use-project-sdk).
+ 5. [.NET Core project SDKs](https://docs.microsoft.com/en-us/dotnet/core/project-sdk/overview). 
+ 6. Once you've gone through that, also check out [nirin/msbuild-sdks on Github](https://github.com/nirin/msbuild-sdks) for some more options on target frameworks. 
 
 Also gone is the `packages.json` file. You now import NuGet dependencies with a much simpler PackageReference element. 
 
@@ -72,7 +78,7 @@ In this example repo, the `ChuckNorris` project imports two such dependencies:
 
 I selected `netstandard2.0` (.NET Standard 2.0) as the TargetFramework for this project specifically because A) .NET Framework v4.7.2 is .NET Standard 2.0 compliant, and B) the deployment of such dependencies and their transient dependencies is not as simple as it used to be.
 
-This project RestSharp to make a query against a REST service to retrieve "Chuck Norris Facts/Jokes". It has one source file, `ChuckNorris.cs`
+This project uses RestSharp to make a query against a REST service to retrieve "Chuck Norris Facts/Jokes". It has one source file, `ChuckNorris.cs`
 ```csharp
 using RestSharp;
 using RestSharp.Serializers.NewtonsoftJson;
