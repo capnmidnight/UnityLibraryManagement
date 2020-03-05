@@ -30,6 +30,7 @@ As stated before, create a new Visual Studio solution, anywhere that is not a ch
     1. `ChuckNorris/` - an example of writing a .NET Standard 2.0 DLL, that itself consumes .NET Standard 2.0 dependencies, acquired out of NuGet.
     2. `ChuckNorris.Console/` - a .NET Core 3.1 app that exercises the `ChuckNorris` DLL
     3. `ChuckNorris.Unity/` - a .NET Framework v4.7.2 DLL that collects together the dependencies of `ChuckNorris`, getting around the issue of .NET Standard 2.0 libraries deploying with a `dependencies.json` file.
+    4. `ChuckNorris.UnityFull/` - the same as `ChuckNorris.Unity`, but also imports Unity's own libraries and implements a MonoBehaviour.
 
 ### SDK-Style project files
 
@@ -188,7 +189,7 @@ It has several things of note:
  4. **ecludeFromUnity.txt contains ChuckNorris.Unity.dll**. Even though there are no source files in the project, a DLL will still be generated. We don't need it, so no need to include it in the export. Also, occasionally, there are certain DLLs that don't play nicely with Unity, that were only added by default by MSBuild. You can use this file to prevent them from being copied. It's also useful in "Optional Item 1" below.
  
 
-### Optional Item 1: Put some meat on the Binding DLLs bones.
+### Optional Item 1: Put some meat on the Binding DLLs bones (ChuckNorris.UnityFull)
 
 You could use the binding DLL as an opportunity to write Unity-specific code that plays nicely with big-boy-pants build and test systems.
 
@@ -197,24 +198,35 @@ If:
  1. You are 
     a. Not writing MonoBehaviours, or
     b. Are writing only new MonoBehaviours (i.e. not attempting to pull existing, in-use MonoBehaviours out of your Assets folder), and
- 3. Don't need to include UnityEditor-specific code in your MonoBehaviours (i.e. no `#if UNITY_EDITOR/#endif`), and
- 4. Don't need to perform any other Platform-dependant, compiler-flagged #if/#endif blocks (i.e. no `#if UNITY_STANDALONE || UNITY_ANDROID` type things), 
+ 2. Don't need to include UnityEditor-specific code in your MonoBehaviours (i.e. no `#if UNITY_EDITOR/#endif`), and
+ 3. Don't need to perform any other Platform-dependant, compiler-flagged #if/#endif blocks (i.e. no `#if UNITY_STANDALONE || UNITY_ANDROID` type things), and
+ 4. You don't mind spending all day tracking down the right dependencies.
  
 Then your project might be a candidate for writing a [Managed Plugin for Unity](https://docs.unity3d.com/Manual/UsingDLL.html).
 
 Here are some steps that I undertake to make it a little easier to maintain over time:
 
  1. I define an environment variable `UNITY_ROOT`, which points to the current version of Unity that I'm using. In my current case, I have it set to `C:\Program Files\Unity\Hub\2019.3.3f1`
- 2. I manually add an assembly reference to UnityEngine.dll to my project file:
- 3. I add UnityEngine.dll to `excludeFromUnity.txt`
+ 2. I manually assembly references to UnityEngine.dll to my project file
+ 3. I add a huge number of Unity files to `excludeFromUnity.txt`
 
-Here is that assembly reference:
+Here is an example of some Unity references.
 ```xml
+  <ItemGroup>
+    <ProjectReference Include="..\ChuckNorris\ChuckNorris.csproj" />
+    <Reference Include="..\..\Library\ScriptAssemblies\Unity.TextMeshPro.dll"/>
+    <Reference Include="..\..\Library\ScriptAssemblies\UnityEngine.UI.dll" />
+  </ItemGroup>
+
   <ItemGroup Condition="Exists('$(UNITY_ROOT)')">
-    <Reference Include="$(UNITY_ROOT)\Editor\Data\Managed\UnityEngine.dll" />
+    <Reference Include="$(UNITY_ROOT)\Editor\Data\Managed\UnityEngine\UnityEngine.dll" />
+    <Reference Include="$(UNITY_ROOT)\Editor\Data\Managed\UnityEngine\UnityEngine.CoreModule.dll" />
   </ItemGroup>
 ```
+
+The easiest way to find where the Unity DLLs are located is to open the Unity C# project, right-click on one of the assemblies you want, and click "Properties". From there, you can copy the path field and modify it to either be a reference including `$(UNITY_ROOT)` or a relative reference to `Library/ScriptAssemblies/`.
  
+Note that this process is only usable for one version of Unity at a time, and any collaborators on the project with you will also have to set the `UNITY_ROOT` environment variable, as well.
 
 ### Optional Item 2: Symlink your DLLs folder
 
