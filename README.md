@@ -16,7 +16,17 @@ To get everything to work just right, we have to commit to using a relatively ri
     3. An XCOPY command takes the collected DLLs from the Ring-Of-Power project and dumps them into your Unity project's Assets/Plugins folder.
  2. In-band of our Unity project, you may want to consider setting the Backend Type in the Project Settings to ".NET 4.x". Unfortunately, I've encountered legitimate defects within the Mono implementations of the .NET Standard 2.0 version of some dependencies.
 
-### Create the Out-of-band VS Solution
+### Alternate approach
+
+I was reminded by user {bddckr} in [vrdevs.slack.com](https://docs.google.com/forms/d/e/1FAIpQLSciLK5MBP0iZZzEM84TCLzYezrpBRKi5BgaUMnvTSRWn_QSqA/viewform?c=0&w=1) that Microsoft has been building a tool called [MSBuildForUnity](https://github.com/microsoft/MSBuildForUnity/), which takes a different approach to the problem of getting NuGet packages into Unity projects. I had tried it out a few months prior to coming to this solution, but was perhaps too early in its development, as I did not succeed in getting it to work. Also, their focus is on running from inside of Unity, which I explicity want to avoid. However, they also have a feature to generate a usable MSBuild project for the final build of the Unity project. That sounds very interesting, so I might give MSBuildForUnity another try, just for that feature. For the other features, I like my approach better, specifically for keeping me outside of Unity as much as possible.
+
+Also, the {bddckr} pointed out that .NET Standard's approach to deploying dependencies in library projects using a `dependencies.json` file can be reconfigured in the project file. See [Issues with .NET Standard 2.0 with .NET Framework & NuGet](https://github.com/dotnet/standard/issues/481) for more information. I've yet to try this, but it seems pretty straight forward. By adding the following XML to the project file, the full dependency graph should be included in the DLL's output directory.
+
+```xml
+<RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+```
+
+### Create the out-of-band VS Solution
 
 As stated before, create a new Visual Studio solution, anywhere that is not a child directory of the Unity project's Assets folder. In this example repo, I have the following folder structure:
 
@@ -207,14 +217,18 @@ If:
  2. Don't need to include UnityEditor-specific code in your MonoBehaviours (i.e. no `#if UNITY_EDITOR/#endif`), and
  3. Don't need to perform any other Platform-dependant, compiler-flagged #if/#endif blocks (i.e. no `#if UNITY_STANDALONE || UNITY_ANDROID` type things), and
  4. You don't mind spending all day tracking down the right dependencies.
- 
+
 Then your project might be a candidate for writing a [Managed Plugin for Unity](https://docs.unity3d.com/Manual/UsingDLL.html).
+
+If you move a MonoBehaviour that is in use in one of your scenes from your Assets folder to your Unity Managed Plugin, it's basically the same thing as deleting the .meta file for that MonoBehaviour. Unity only knows how to locate the source of a MonoBehaviour's definition by searching by Guid that they generate and store in the .meta file. That Guid tells them the location of the definition, and then it seems they search by name thereafter. For any MonoBehaviours comming out of your Unity Managed Plugin, they'll all have the same Guid, the Guid for the plugin DLL. Thus, moving the MonoBehaviour from Assets to the Managed Plugin breaks scene references.
 
 Here are some steps that I undertake to make it a little easier to maintain over time:
 
- 1. I define an environment variable `UNITY_ROOT`, which points to the current version of Unity that I'm using. In my current case, I have it set to `C:\Program Files\Unity\Hub\2019.3.3f1`
- 2. I manually assembly references to UnityEngine.dll to my project file
- 3. I add a huge number of Unity files to `excludeFromUnity.txt`
+ 1. Define an environment variable `UNITY_ROOT`, which points to the current version of Unity that I'm using. In my current case, I have it set to `C:\Program Files\Unity\Hub\2019.3.3f1`
+ 2. Manually add assembly references to UnityEngine.dll to the project file
+ 3. Pay attention to build errors to discover the additional Unity DLLs needed to add to the project to support the features you're building.
+ 4. Use your git change history to discover the huge number of Unity DLLs/PDBs/XMLs to `excludeFromUnity.txt`
+ 5. If you decide to move MonoBehaviours, do them one at a time, correcting broken scene references as you go. That way, all broken scene references will be only one particular class and easy to restore. Otherwise, Unity gives you no hint as to what that broken scene reference might have original referred.
 
 Here is an example of some Unity references.
 ```xml
@@ -232,7 +246,7 @@ Here is an example of some Unity references.
 
 The easiest way to find where the Unity DLLs are located is to open the Unity C# project, right-click on one of the assemblies you want, and click "Properties". From there, you can copy the path field and modify it to either be a reference including `$(UNITY_ROOT)` or a relative reference to `Library/ScriptAssemblies/`.
  
-Note that this process is only usable for one version of Unity at a time, and any collaborators on the project with you will also have to set the `UNITY_ROOT` environment variable, as well.
+Note that this process is only usable for one version of Unity at a time, and any collaborators on the project with you will also have to set the `UNITY_ROOT` environment variable.
 
 ### Optional Item 2: Symlink your DLLs folder
 
@@ -273,7 +287,7 @@ For added control over projects, instead of copying directly to your Unity proje
     1. etc.
  6. etc.
 
-In my project, I have a large chunk of library code named "Juniper", which has its own BAT file that creates a similar structure for itself (*NOTE: the use of the `@` prefix on commands is for selectively excluding commands from echoing to the terminal, rather than `ECHO OFF`ing everything and getting no output*). :
+In my project, I have a large chunk of library code named "Juniper", which has its own BAT file that creates a similar structure for itself (*NOTE: the use of the `@` prefix on commands is for selectively excluding commands from echoing to the terminal, rather than `ECHO OFF`-ing everything and getting no output*). :
 
 ```batch
 @rem USAGE: `call init-project.bat "<platform>" "<dest>"`
