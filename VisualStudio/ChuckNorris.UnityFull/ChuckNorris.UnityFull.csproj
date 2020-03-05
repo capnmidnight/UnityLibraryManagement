@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ChuckNorris\ChuckNorris.csproj" />
+    <Reference Include="..\..\Library\ScriptAssemblies\Unity.TextMeshPro.dll"/>
+    <Reference Include="..\..\Library\ScriptAssemblies\UnityEngine.UI.dll" />
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)|$(TargetFramework)'=='Release|net472'">
+    <Exec ContinueOnError="true" Command="XCOPY &quot;$(TargetDir)*&quot; &quot;..\..\Assets\Plugins&quot; /exclude:excludeFromUnity.txt /C /I /F /Y" />
+  </Target>
+    
+  <ItemGroup Condition="Exists('$(UNITY_ROOT)')">
+      <Reference Include="$(UNITY_ROOT)\Editor\Data\Managed\UnityEngine\UnityEngine.dll" />
+      <Reference Include="$(UNITY_ROOT)\Editor\Data\Managed\UnityEngine\UnityEngine.CoreModule.dll" />
+  </ItemGroup>
+
+</Project>
