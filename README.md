@@ -54,7 +54,7 @@ Gone are the days of gigantic csproj files. The simplest csproj file now looks l
 </Project>
 ```
 
-Notice the lack of XML doctype declaration, the lack of importing MSBuild subprojects, even the lack of naming the assembly and root namespace. While those may certainly be added for more control, most projects will use the defualts of the project type specified by "Microsoft.NET.Sdk" and the assembly and namespace names taken from the project directory name. 
+Notice the lack of XML doctype declaration, the lack of importing MSBuild subprojects, even the lack of naming the assembly and root namespace. While those may certainly be added for more control, most projects will use the defaults of the project type specified by "Microsoft.NET.Sdk" and the assembly and namespace names taken from the project directory name. 
 
 For more information on .NET Standard, the SDKs, and MSBuild, you might like to read 
  1. [.NET Standard](https://docs.microsoft.com/en-us/dotnet/standard/net-standard)
@@ -131,7 +131,7 @@ namespace ChuckNorris
 ```
 
 #### Exercising the example (ChuckNorris.Console)
-The `ChuckNorris.Console` project is set to `netcoreapp3.1` (.NET Core 3.1) to show that this code is useable without Unity, in other runtimes that support .NET Standard 2.0
+The `ChuckNorris.Console` project is set to `netcoreapp3.1` (.NET Core 3.1) to show that this code is usable without Unity, in other runtimes that support .NET Standard 2.0
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
 
