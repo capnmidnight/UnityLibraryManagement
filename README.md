@@ -62,7 +62,7 @@ For more information on .NET Standard, the SDKs, and MSBuild, you might like to 
  3. [Target frameworks in SDK-style projects](https://docs.microsoft.com/en-us/dotnet/standard/frameworks).
  4. [How to: Use MSBuild project SDKs](https://docs.microsoft.com/en-us/visualstudio/msbuild/how-to-use-project-sdk).
  5. [.NET Core project SDKs](https://docs.microsoft.com/en-us/dotnet/core/project-sdk/overview). 
- 6. Once you've gone through that, also check out [nirin/msbuild-sdks on Github](https://github.com/nirin/msbuild-sdks) for some more options on target frameworks. 
+ 6. Once you've gone through that, also check out [novotnyllc/MSBUildSdkExtras on Github](https://github.com/novotnyllc/MSBuildSdkExtras) for some more options on target frameworks. 
 
 Also gone is the `packages.json` file. You now import NuGet dependencies with a much simpler PackageReference element. 
 
